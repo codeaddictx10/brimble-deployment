@@ -1,0 +1,82 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    depends_on:
+      - api
+    networks:
+      - brimble_runtime
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DATABASE_PATH: /data/brimble.sqlite
+      PUBLIC_BASE_URL: http://localhost:8080
+      PORT: 4000
+      UPLOAD_ROOT: /data/uploads
+    volumes:
+      - brimble_data:/data
+    networks:
+      - brimble_runtime
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    depends_on:
+      - api
+      - buildkitd
+      - caddy
+    environment:
+      DATABASE_PATH: /data/brimble.sqlite
+      PUBLIC_BASE_URL: http://localhost:8080
+      WORKSPACE_ROOT: /tmp/brimble/workspaces
+      UPLOAD_ROOT: /data/uploads
+      RUNTIME_NETWORK: brimble_runtime
+      BUILDKIT_HOST: tcp://buildkitd:1234
+      CADDY_ADMIN_URL: http://caddy:2019/load
+      CADDY_CONFIG_PATH: /data/caddy/Caddyfile
+      APP_PORT: 3000
+    volumes:
+      - brimble_data:/data
+      - brimble_workspaces:/tmp/brimble/workspaces
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - brimble_runtime
+
+  caddy:
+    image: caddy:2.8.4-alpine
+    depends_on:
+      - web
+      - api
+    command:
+      - /bin/sh
+      - -lc
+      - mkdir -p /data/caddy && [ -f /data/caddy/Caddyfile ] || cp /bootstrap/Caddyfile /data/caddy/Caddyfile && caddy run --config /data/caddy/Caddyfile --adapter caddyfile
+    volumes:
+      - ./infra/caddy/Caddyfile:/bootstrap/Caddyfile:ro
+      - brimble_data:/data
+    ports:
+      - "8080:80"
+    networks:
+      - brimble_runtime
+
+  buildkitd:
+    image: moby/buildkit:buildx-stable-1
+    command:
+      - --addr
+      - tcp://0.0.0.0:1234
+    privileged: true
+    networks:
+      - brimble_runtime
+
+volumes:
+  brimble_data:
+  brimble_workspaces:
+
+networks:
+  brimble_runtime:
+    name: brimble_runtime

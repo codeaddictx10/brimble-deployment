@@ -1,0 +1,25 @@
+{
+  "name": "@brimble/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/client.ts",
+    "./client": "./src/client.ts",
+    "./server": "./src/server.ts"
+  },
+  "types": "./src/client.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

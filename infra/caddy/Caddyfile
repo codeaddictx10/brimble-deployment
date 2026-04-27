@@ -1,0 +1,16 @@
+{
+  admin 0.0.0.0:2019
+  auto_https off
+}
+
+:80 {
+  @api path /api* /healthz
+  handle @api {
+    reverse_proxy api:4000
+  }
+
+  handle {
+    reverse_proxy web:3000
+  }
+}
+
