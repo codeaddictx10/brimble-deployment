@@ -65,3 +65,13 @@ To test an uploaded project, switch the form source to `Upload zip` and submit a
 **Resilience.** On startup, there is a function re-queues any jobs that were mid-flight when the worker last crashed. Railpack builds retry once (1.5s delay) on recognised transient errors (connection resets, EOF, TLS timeouts); all other failures go straight to `failed`.
 
 **`packages/core`.** Shared library (no browser-unsafe imports on the client path) containing all TypeScript types, the SQLite store with auto-migrations, URL/Caddyfile rendering helpers, and Zod validation schemas.
+
+
+## Duration
+~ 10 hours
+
+## What you'd change if you had another weekend
+1. Deploy app in private github repo
+2. Feature to remove/stop/restart/redeploy deployed app
+3. Tweak the UI a little bit
+4. Auto deploy
